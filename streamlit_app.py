@@ -24,7 +24,6 @@ if "reset_form" in st.session_state and st.session_state.reset_form:
 
     st.session_state.reset_form = False
 
-
 st.markdown("""
 <style>
 
@@ -51,7 +50,7 @@ st.title("💎 Customer Segmentation")
 gender = st.selectbox("Gender", ["Select","Male", "Female"],key="gender")
 education = st.selectbox("Education", ["Select","High School", "Graduate", "Post Graduate"],key="education")
 
-age=st.number_input("Age",value =0,step=1,key="age")
+age=st.number_input("Age",step=1,key="age")
 income = st.number_input("Income",min_value=0,key="income")
 spending = st.number_input("Spending",min_value=0, step=1000,key="spending")
 purchase = st.number_input("Purchase Frequency",min_value=0,key="purchase_frequency")

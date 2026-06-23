@@ -203,6 +203,6 @@ values = [income_score, spending_score, purchase_score, clv_score, loyalty_score
 fig = go.Figure()
 fig.add_trace(go.Scatterpolar(r=values, theta=categories, fill='toself', line=dict(color='#6D28D9')))
 fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=False, height=450, margin=dict(t=20, b=20, l=20, r=20))
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
 if st.button("⬅ Back to Prediction"):
     st.switch_page("streamlit_app.py")

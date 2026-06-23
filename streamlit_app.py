@@ -2,7 +2,7 @@
 import streamlit as st 
 import pandas as pd
 import numpy as np
-from datetime import date
+import sqlite3
 import requests
 if "payload" in st.session_state and "restored" not in st.session_state:
 
@@ -44,6 +44,47 @@ st.markdown("""
 
 </style>
 """, unsafe_allow_html=True)
+
+conn = sqlite3.connect(
+    "predictions.db",
+    check_same_thread=False
+)
+
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS history(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+age INTEGER,
+
+gender TEXT,
+
+education TEXT,
+
+income REAL,
+
+spending REAL,
+
+purchase REAL,
+
+segment TEXT,
+
+cluster INTEGER,
+
+clv REAL,
+
+coupon TEXT,
+
+health_score INTEGER,
+
+churn TEXT
+
+)
+""")
+
+conn.commit()
 
 st.title("💎 Customer Segmentation")
 
@@ -113,7 +154,66 @@ if predict:
 
             st.session_state.result=result
             st.session_state.payload = payload
+            
+            cursor.execute("""
 
+INSERT INTO history(
+
+age,
+gender,
+education,
+income,
+spending,
+purchase,
+segment,
+cluster,
+clv,
+coupon,
+health_score,
+churn
+
+)
+
+VALUES(
+
+?,?,?,?,?,?,?,?,?,?,?,?
+
+)
+
+""",
+
+(
+
+payload["age"],
+
+payload["gender"],
+
+payload["education"],
+
+result["income"],
+
+result["spending"],
+
+result["purchase"],
+
+result["name"],
+
+result["cluster"],
+
+result["clv"],
+
+result["coupon"],
+
+result["health_score"],
+
+result["churn_text"]
+
+)
+
+)
+
+
+            conn.commit()
 
             if "history" not in st.session_state:
                 st.session_state.history=[]

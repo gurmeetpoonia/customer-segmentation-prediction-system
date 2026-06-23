@@ -2,15 +2,29 @@ import streamlit as st
 import pandas as pd 
 import numpy as np 
 import plotly.graph_objects as go
-
+import sqlite3
 if "result" not in st.session_state:
+    
     st.warning("Please predict a customer segment first.")
     if st.button("⬅ Back to Prediction"):
         st.switch_page("streamlit_app.py")
     st.stop()
 
 result = st.session_state.result
+conn = sqlite3.connect(
+    "predictions.db"
+)
 
+
+df = pd.read_sql(
+
+    "SELECT * FROM history",
+
+    conn
+
+)
+
+conn.close()
 # 💎 Page Config
 st.set_page_config(
     page_title="Customer Segmentation",
@@ -206,19 +220,121 @@ fig = go.Figure()
 fig.add_trace(go.Scatterpolar(r=values, theta=categories, fill='toself', line=dict(color='#6D28D9')))
 fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=False, height=450, margin=dict(t=20, b=20, l=20, r=20))
 st.plotly_chart(fig, width="stretch")
+
+
+st.write("---")
+st.markdown("""
+    <style>
+    /* हेडर स्टाइल */
+    .main-header {
+        font-size: 28px;
+        font-weight: bold;
+        color: #1E3A8A; /* Dark Blue */
+        border-bottom: 3px solid #3B82F6;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+    }
+    
+    /* डाउनलोड बटन स्टाइल */
+    div.stDownloadButton > button:first-child {
+        background-color: #10B981 !important; /* Beautiful Green */
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-weight: bold !important;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    div.stDownloadButton > button:first-child:hover {
+        background-color: #059669 !important; /* Darker Green on Hover */
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    /* क्लियर हिस्ट्री बटन स्टाइल */
+    div.stButton > button:first-child {
+        background-color: #EF4444 !important; /* Vibrant Red */
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-weight: bold !important;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #DC2626 !important; /* Darker Red on Hover */
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    </style>
+""", unsafe_allow_html=True)
+# --- 2. Beautiful Header ---
+st.markdown('<div class="main-header">📜 Prediction History Dashboard</div>', unsafe_allow_html=True)
+
+# --- 3. Main Logic ---
+# ध्यान दें: डेटा होने पर भी अगर 'history' session_state में खाली लिस्ट है तो उसे संभालना जरूरी है
+if "history" in st.session_state and len(st.session_state.history) > 0:
+    df = pd.DataFrame(st.session_state.history)
+
+    # डेटाफ्रेम को एक अच्छे और फुल-विड्थ कंटेनर में दिखाना
+    st.markdown("### 📊 Saved Records")
+    st.dataframe(df, use_container_width=True) # width='stretch' की जगह use_container_width=True सही तरीका है
+    
+    csv = df.to_csv(index=False).encode("utf-8")
+
+    st.markdown("---") # एक साफ़ सेपरेटर लाइन
+
+    # बटन के लिए दो कॉलम्स
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.download_button(
+            label="📥 Download CSV Report",
+            data=csv,
+            file_name="prediction_history.csv",
+            mime="text/csv"
+        )
+
+    with col2:
+        if st.button("🗑️ Clear All History"):
+            # डेटाबेस से डिलीट करना
+            conn = sqlite3.connect("predictions.db")
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM history")
+            conn.commit()
+            conn.close()
+
+            # Session State को भी तुरंत खाली करना ताकि UI तुरंत अपडेट हो जाए
+            st.session_state.history = []
+
+            st.success("🎉 History Cleared Successfully!")
+            st.rerun()
+else:        
+    # अगर कोई डेटा नहीं है तो एक सुंदर इन्फो बॉक्स
+    st.info("💡 No prediction history available yet. Start making predictions to fill this dashboard!")
+st.markdown("""
+    <style>
+    div.stButton > button:first-child {
+        background-color: #ffffff; /* बैकग्राउंड कलर */
+        color: #4F46E5; /* टेक्स्ट का रंग (Indigo) */
+        border: 2px solid #4F46E5; /* बॉर्डर */
+        border-radius: 20px; /* घुमावदार कोने */
+        padding: 8px 20px; /* पैडिंग */
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    /* जब माउस बटन पर जाए (Hover Effect) */
+    div.stButton > button:first-child:hover {
+        background-color: #4F46E5;
+        color: white;
+        border-color: #4F46E5;
+        transform: scale(1.05); /* हल्का सा बड़ा होना */
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 if st.button("⬅ Back to Prediction"):
-    st.switch_page("streamlit_app.py")
-
-st.write("## 📜 Prediction History")
-
-
-if "history" in st.session_state:
-    df=pd.DataFrame(st.session_state.history)
-
-    st.dataframe(df,width='stretch')
-    csv=df.to_csv(index=False).encode("utf-8")
-
-    st.download_button(label="📥 Download CSV",data =csv,file_name="customer_predictions.csv",mime="text/csv")
-
-else:
-    st.info("No prediction history available.")
+    st.switch_page("streamlit_app.py")    

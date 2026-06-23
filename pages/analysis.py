@@ -1,6 +1,8 @@
 import streamlit as st 
+import pandas as pd 
 import numpy as np 
 import plotly.graph_objects as go
+
 if "result" not in st.session_state:
     st.warning("Please predict a customer segment first.")
     if st.button("⬅ Back to Prediction"):
@@ -206,3 +208,17 @@ fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), sho
 st.plotly_chart(fig, width="stretch")
 if st.button("⬅ Back to Prediction"):
     st.switch_page("streamlit_app.py")
+
+st.write("## 📜 Prediction History")
+
+
+if "history" in st.session_state:
+    df=pd.DataFrame(st.session_state.history)
+
+    st.dataframe(df,width='stretch')
+    csv=df.to_csv(index=False).encode("utf-8")
+
+    st.download_button(label="📥 Download CSV",data =csv,file_name="customer_predictions.csv",mime="text/csv")
+
+else:
+    st.info("No prediction history available.")

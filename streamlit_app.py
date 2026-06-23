@@ -96,26 +96,62 @@ if predict:
     }
 
     try:
-        st.session_state.payload=payload
-        response=requests.post(
+        with st.spinner("🔄 Analyzing Customer..."):
+            st.session_state.payload=payload
+            response=requests.post(
 
         "https://customer-segmentation-prediction-system.onrender.com/predict",
 
-        json=payload
-
+        json=payload,
+        timeout=5
     )
 
+            response.raise_for_status()
+
+            result=response.json()
 
 
-        result=response.json()
+            st.session_state.result=result
+            st.session_state.payload = payload
 
 
-        st.session_state.result=result
+            if "history" not in st.session_state:
+                st.session_state.history=[]
+                
+            st.session_state.history.append({
+            "Age": payload["age"],
+    "Gender": payload["gender"],
+    "Education": payload["education"],
 
+    "Income": result["income"],
+    "Spending": result["spending"],
+    "Purchase": result["purchase"],
 
-        st.switch_page("pages/analysis.py")
-        st.write(st.session_state)
+    "Segment": result["name"],
+    "Cluster": result["cluster"],
 
-    except(Exception):
-            st.error("⚠️ API is not running.")
-            st.stop()
+    "Confidence": result["confidence"],
+
+    "CLV": result["clv"],
+
+    "Coupon": result["coupon"],
+
+    "Health Score": result["health_score"],
+
+    "Churn Risk": result["churn_text"]        
+            })
+
+            st.switch_page("pages/analysis.py")
+            st.write(st.session_state)
+
+    except requests.exceptions.Timeout:
+        st.error("⌛ API request timed out. Please try again.")
+
+    except requests.exceptions.ConnectionError:
+        st.error("❌ Cannot connect to API server.")    
+
+    except requests.exceptions.HTTPError as e:
+        st.error(f"⚠️ Server Error: {e}")    
+
+    except Exception as e:
+        st.error(f"🚨 Unexpected Error: {e}")   

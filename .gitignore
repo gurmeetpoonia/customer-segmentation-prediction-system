@@ -1,0 +1,6 @@
+# ignore everything
+*
+
+# allow only main file
+!streamlit_app.py
+!.gitignore

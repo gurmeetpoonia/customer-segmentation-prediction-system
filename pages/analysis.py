@@ -11,18 +11,12 @@ if "result" not in st.session_state:
     st.stop()
 
 result = st.session_state.result
-conn = sqlite3.connect(
-    "predictions.db"
-)
+conn = sqlite3.connect("predictions.db")
 
 
-df = pd.read_sql(
 
-    "SELECT * FROM history",
 
-    conn
-
-)
+df = pd.read_sql("SELECT * FROM history",conn)
 
 conn.close()
 # 💎 Page Config
@@ -33,7 +27,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- ADVANCED CSS STYLING ---
+# ADVANCED CSS STYLING 
 st.markdown("""
 <style>
 [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"], [data-testid="stHeader"] {
@@ -83,11 +77,8 @@ purchase = result["purchase"]
 health_score = result["health_score"]
 coupon = result["coupon"]
 recommendation = result.get("recommendation", "N/A")
-
-# --- FETCHING SEPARATED FIELDS ---
 summary = result.get("summary", "No Summary Available")
 insight = result.get("insight", "No Insight Available")
-
 clv_predicted = result["clv"]
 churn_risk = result["churn_risk"]
 churn_text = result["churn_text"]
@@ -195,7 +186,7 @@ with feat_col2:
 
 st.write("---")
 
-# --- AI EXECUTIVE SUMMARY (Now displays separated summary) ---
+# AI EXECUTIVE SUMMARY 
 st.markdown(f"""
 <div class='card-3d feature-card'>
     <h3 style='color:#BE185D; margin-top: 0;'>🤖 AI Executive Summary</h3>
@@ -225,7 +216,7 @@ st.plotly_chart(fig, width="stretch")
 st.write("---")
 st.markdown("""
     <style>
-    /* हेडर स्टाइल */
+    /* head style  */
     .main-header {
         font-size: 28px;
         font-weight: bold;
@@ -235,9 +226,9 @@ st.markdown("""
         margin-bottom: 25px;
     }
     
-    /* डाउनलोड बटन स्टाइल */
+    /* download button ke liye style  */
     div.stDownloadButton > button:first-child {
-        background-color: #10B981 !important; /* Beautiful Green */
+        background-color: #10B981 !important;
         color: white !important;
         border: none !important;
         border-radius: 8px !important;
@@ -247,14 +238,14 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     div.stDownloadButton > button:first-child:hover {
-        background-color: #059669 !important; /* Darker Green on Hover */
+        background-color: #059669 !important;
         transform: translateY(-2px);
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
-    /* क्लियर हिस्ट्री बटन स्टाइल */
+    /* clear history ke liye style*/
     div.stButton > button:first-child {
-        background-color: #EF4444 !important; /* Vibrant Red */
+        background-color: #EF4444 !important; 
         color: white !important;
         border: none !important;
         border-radius: 8px !important;
@@ -264,29 +255,27 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     div.stButton > button:first-child:hover {
-        background-color: #DC2626 !important; /* Darker Red on Hover */
+        background-color: #DC2626 !important; 
         transform: translateY(-2px);
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     </style>
 """, unsafe_allow_html=True)
-# --- 2. Beautiful Header ---
+
 st.markdown('<div class="main-header">📜 Prediction History Dashboard</div>', unsafe_allow_html=True)
 
-# --- 3. Main Logic ---
-# ध्यान दें: डेटा होने पर भी अगर 'history' session_state में खाली लिस्ट है तो उसे संभालना जरूरी है
 if "history" in st.session_state and len(st.session_state.history) > 0:
     df = pd.DataFrame(st.session_state.history)
 
-    # डेटाफ्रेम को एक अच्छे और फुल-विड्थ कंटेनर में दिखाना
+
     st.markdown("### 📊 Saved Records")
-    st.dataframe(df, use_container_width=True) # width='stretch' की जगह use_container_width=True सही तरीका है
+    st.dataframe(df,width="stretch" )
     
     csv = df.to_csv(index=False).encode("utf-8")
 
-    st.markdown("---") # एक साफ़ सेपरेटर लाइन
+    st.markdown("---") 
 
-    # बटन के लिए दो कॉलम्स
+    
     col1, col2 = st.columns(2)
 
     with col1:
@@ -299,39 +288,38 @@ if "history" in st.session_state and len(st.session_state.history) > 0:
 
     with col2:
         if st.button("🗑️ Clear All History"):
-            # डेटाबेस से डिलीट करना
+        
             conn = sqlite3.connect("predictions.db")
             cursor = conn.cursor()
             cursor.execute("DELETE FROM history")
             conn.commit()
             conn.close()
 
-            # Session State को भी तुरंत खाली करना ताकि UI तुरंत अपडेट हो जाए
+            # Session State ko bhi turant khali karna taki UI turant update ho jaye
             st.session_state.history = []
 
             st.success("🎉 History Cleared Successfully!")
             st.rerun()
 else:        
-    # अगर कोई डेटा नहीं है तो एक सुंदर इन्फो बॉक्स
+    #aagar koi data na ho to ek beautiful info box show 
     st.info("💡 No prediction history available yet. Start making predictions to fill this dashboard!")
 st.markdown("""
     <style>
     div.stButton > button:first-child {
-        background-color: #ffffff; /* बैकग्राउंड कलर */
-        color: #4F46E5; /* टेक्स्ट का रंग (Indigo) */
-        border: 2px solid #4F46E5; /* बॉर्डर */
-        border-radius: 20px; /* घुमावदार कोने */
-        padding: 8px 20px; /* पैडिंग */
+        background-color: #ffffff; 
+        color: #4F46E5; 
+        border: 2px solid #4F46E5; 
+        border-radius: 20px;
+        padding: 8px 20px; 
         font-weight: bold;
         transition: all 0.3s ease;
     }
-    
-    /* जब माउस बटन पर जाए (Hover Effect) */
+
     div.stButton > button:first-child:hover {
         background-color: #4F46E5;
         color: white;
         border-color: #4F46E5;
-        transform: scale(1.05); /* हल्का सा बड़ा होना */
+        transform: scale(1.05); /*halka sa baada hona  */
     }
     </style>
 """, unsafe_allow_html=True)

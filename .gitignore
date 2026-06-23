@@ -1,6 +1,14 @@
-# ignore everything
-*
+# python cache
+__pycache__/
+*.pyc
 
-# allow only main file
-!streamlit_app.py
-!.gitignore
+# environment
+venv/
+.env
+
+# data (optional for production)
+customer_data.csv
+predictions.db
+
+# system
+.DS_Store
